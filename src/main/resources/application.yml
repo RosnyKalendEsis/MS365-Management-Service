@@ -1,0 +1,39 @@
+# Configuration globale
+spring:
+  profiles:
+    active: dev
+  application:
+    name: MS365-Management-Service
+
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 5MB
+      max-request-size: 5MB
+
+server:
+  port: 8082
+
+logging:
+  level:
+    org.springframework.web: DEBUG
+    org.springframework.http.converter.json: DEBUG
+
+# Profil LOCAL
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/db_ms365_management
+    username: root
+    password:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.MySQLDialect
+    open-in-view: true
