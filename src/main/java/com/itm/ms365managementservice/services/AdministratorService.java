@@ -2,44 +2,58 @@ package com.itm.ms365managementservice.services;
 
 import com.itm.ms365managementservice.entities.Administrator;
 import com.itm.ms365managementservice.repositories.AdministratorRepository;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class AdministratorService {
 
-    private final AdministratorRepository repository;
+    private final AdministratorRepository administratorRepository;
 
-    public List<Administrator> getAll() {
-        return repository.findAll();
+    // Créer un administrateur
+    public Administrator createAdministrator(Administrator administrator) {
+        return administratorRepository.save(administrator);
     }
 
-    public Administrator getById(String id) {
-        return repository.findById(id).orElse(null);
+    // Mettre à jour un administrateur
+    public Administrator updateAdministrator(String id, Administrator updatedAdmin) {
+        Optional<Administrator> optionalAdmin = administratorRepository.findById(id);
+        if (optionalAdmin.isPresent()) {
+            Administrator existingAdmin = optionalAdmin.get();
+            existingAdmin.setEmail(updatedAdmin.getEmail());
+            existingAdmin.setPwd(updatedAdmin.getPwd());
+            existingAdmin.setRole(updatedAdmin.getRole());
+            return administratorRepository.save(existingAdmin);
+        }
+        throw new RuntimeException("Administrator not found with id: " + id);
     }
 
-    public Administrator create(Administrator administrator) {
-        return repository.save(administrator);
+    // Supprimer un administrateur
+    public void deleteAdministrator(String id) {
+        administratorRepository.deleteById(id);
     }
 
-    public Administrator update(String id, Administrator u) {
-        return repository.findById(id).map(existing -> {
-            existing.setEmail(u.getEmail());
-            existing.setPwd(u.getPwd());
-            existing.setRole(u.getRole());
-            return repository.save(existing);
-        }).orElse(null);
+    // Obtenir un administrateur par ID
+    public Optional<Administrator> getAdministratorById(String id) {
+        return administratorRepository.findById(id);
     }
 
-    public Administrator findByEmail(String email){
-        return repository.findByEmail(email);
+    // Obtenir un administrateur par email
+    public Administrator getAdministratorByEmail(String email) {
+        return administratorRepository.findByEmail(email);
     }
 
+    // Obtenir tous les administrateurs
+    public List<Administrator> getAllAdministrators() {
+        return administratorRepository.findAll();
+    }
 
-    public void delete(String id) {
-        repository.deleteById(id);
+    // Vérifier s'il existe un administrateur avec l'email donné
+    public boolean existsByEmail(String email) {
+        return administratorRepository.existsByEmail(email);
     }
 }

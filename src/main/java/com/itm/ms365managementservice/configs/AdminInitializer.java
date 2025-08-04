@@ -8,8 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-
-import java.util.UUID;
+import java.time.ZonedDateTime;
 
 @Component
 @RequiredArgsConstructor
@@ -20,15 +19,17 @@ public class AdminInitializer {
 
     @PostConstruct
     public void init() {
-        boolean adminExist = repository.findAll().stream()
-                .anyMatch(u -> u.getRole() == Role.ADMIN);
+        boolean adminExists = repository.findAll().stream()
+                .anyMatch(u -> u.getRole() == Role.SUPER_ADMIN);
 
-        if (!adminExist) {
+        if (!adminExists) {
             Administrator admin = new Administrator();
-            admin.setId(UUID.randomUUID().toString());
-            admin.setEmail("admin@itm.cd");
+            admin.setEmail("admin@itmafrica.com");
             admin.setPwd(passwordEncoder.encode("Admin1234"));
-            admin.setRole(Role.ADMIN);
+            admin.setRole(Role.SUPER_ADMIN);
+            admin.setDisplayName("Super Admin");
+            admin.setUserPrincipalName("admin@itmafrica.com");
+            admin.setStatus("ACTIF");
 
             repository.save(admin);
         }
