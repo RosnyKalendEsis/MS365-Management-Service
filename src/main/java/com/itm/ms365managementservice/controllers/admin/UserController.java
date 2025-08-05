@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -37,6 +39,10 @@ public class UserController {
     // 🔹 POST /api/users → créer un utilisateur
     @PostMapping
     public ResponseEntity<User> createUser(@RequestBody User user) {
+        user.setCreatedDate(ZonedDateTime.now());
+        user.setLicenses(new ArrayList<>());
+        user.setLicenseExpired(false);
+        user.setLicensed(false);
         return ResponseEntity.ok(userService.createUser(user));
     }
 
