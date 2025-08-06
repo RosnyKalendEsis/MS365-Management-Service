@@ -55,5 +55,10 @@ public class LicenseManagerController {
             return ResponseEntity.status(500).body(e.getMessage());
         }
     }
+
+    @GetMapping("/api/licenses")
+    public List<Map<String, Object>> listLicenses() throws Exception {
+        return licenseManagerService.getLicenses();
+    }
 }
 

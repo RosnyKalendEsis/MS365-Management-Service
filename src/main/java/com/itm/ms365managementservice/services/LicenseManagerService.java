@@ -5,11 +5,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itm.ms365managementservice.entities.License;
 import com.itm.ms365managementservice.entities.User;
 import com.itm.ms365managementservice.repositories.UserRepository;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +23,7 @@ import java.util.stream.Collectors;
 public class LicenseManagerService {
 
     private final UserRepository userRepository;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     private final static String POWERSHELL_SCRIPT_PATH = "src/main/resources/scripts/powershell/";
 
@@ -128,6 +132,39 @@ public class LicenseManagerService {
 
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readValue(output, new TypeReference<>() {});
+    }
+
+    public List<Map<String, Object>> getLicenses() throws Exception {
+        // Commande pour lancer le script PowerShell
+        // Remplace le chemin par le chemin correct vers ton script
+        String scriptPath = "/chemin/vers/export-licences.ps1";
+
+        // pwsh -File "script.ps1"
+        ProcessBuilder pb = new ProcessBuilder("pwsh", "-File", scriptPath);
+
+        Process process = pb.start();
+
+        // Lire la sortie du script (qui est le JSON généré)
+        BufferedReader reader = new BufferedReader(
+                new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8));
+
+        StringBuilder output = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            output.append(line);
+        }
+
+        int exitCode = process.waitFor();
+        if (exitCode != 0) {
+            throw new RuntimeException("Erreur lors de l'exécution du script PowerShell");
+        }
+
+        // Parser le JSON en List<Map>
+        List<Map<String, Object>> licenses = objectMapper.readValue(output.toString(),
+                new TypeReference<List<Map<String, Object>>>() {
+                });
+
+        return licenses;
     }
 
 }
