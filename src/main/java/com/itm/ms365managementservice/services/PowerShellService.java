@@ -10,6 +10,9 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,7 +33,6 @@ public class PowerShellService {
 
             commandWriter = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
             commandReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            List<AzureState> dbAzureStates = azureStateRepository.findAll();
 
             // Lecture des logs en arrière-plan
             new Thread(() -> {
@@ -41,6 +43,7 @@ public class PowerShellService {
 
                 try {
                     while ((line = commandReader.readLine()) != null) {
+                        List<AzureState> dbAzureStates = azureStateRepository.findAll();
                         System.out.println("[POWERSHELL] " + line);
 
                         // 🔗 Récupération de l'URL
@@ -49,17 +52,15 @@ public class PowerShellService {
                             System.out.println("🔗 URL d'authentification : " + url);
                         }
 
-                        // 🔐 Récupération du code
-                        if (line.matches(".*\\b[A-Z0-9]{8,12}\\b.*")) {
-                            String[] words = line.split("\\s+");
-                            for (String wordCandidate : words) {
-                                if (wordCandidate.matches("\\b[A-Z0-9]{8,12}\\b")) {
-                                    code = wordCandidate;
-                                    System.out.println("🔐 Code d'authentification : " + code);
-                                    break;
-                                }
-                            }
+                        // 🔐 Récupération plus précise du code
+                        Pattern precisePattern = Pattern.compile("the code\\s+([A-Z0-9]{8,12})\\s+to authenticate", Pattern.CASE_INSENSITIVE);
+                        Matcher matcher = precisePattern.matcher(line);
+
+                        if (matcher.find()) {
+                            code = matcher.group(1);
+                            System.out.println("🔐 Code d'authentification : " + code);
                         }
+
 
                         // ✅ Enregistrement de l'état si code et URL trouvés
                         if (url != null && code != null) {
@@ -85,6 +86,8 @@ public class PowerShellService {
                             azureState.setCallback(null);
                             azureStateRepository.save(azureState);
                             isConnected = true;
+                            url = null;
+                            code = null;
                         }
                     }
                 } catch (IOException e) {
@@ -120,20 +123,22 @@ public class PowerShellService {
         }
     }
 
-    public void sendScriptFile(String scriptPath) throws IOException {
-        if (commandWriter == null) {
-            throw new IllegalStateException("La session PowerShell n’est pas démarrée.");
+    public String runScript(String scriptName) throws IOException {
+        StringBuilder output = new StringBuilder();
+        String scriptPath = POWERSHELL_SCRIPT_PATH + scriptName;
+
+        sendCommand("& '" + new File(scriptPath).getAbsolutePath() + "'");
+
+        // Lis la réponse (exemple : sur 20 lignes max ici)
+        for (int i = 0; i < 20; i++) {
+            String line = commandReader.readLine();
+            if (line == null) break;
+            output.append(line).append("\n");
         }
 
-        // Lire tout le contenu du fichier
-        List<String> lines = Files.readAllLines(Paths.get(scriptPath));
-
-        for (String line : lines) {
-            commandWriter.write(line);
-            commandWriter.newLine();
-        }
-
-        commandWriter.flush(); // très important
+        return output.toString();
     }
+
+
 }
 

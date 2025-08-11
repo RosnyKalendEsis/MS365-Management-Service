@@ -1,24 +1,49 @@
 package com.itm.ms365managementservice.controllers.exposed;
 
+import com.itm.ms365managementservice.entities.PowerShellCommandDTO;
 import com.itm.ms365managementservice.services.PowerShellService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/powershell")
-public class PowerShellController {
+public class
+PowerShellController {
     private final PowerShellService powerShellService;
+    private final static String POWERSHELL_SCRIPT_PATH = "src/main/resources/scripts/powershell/response.json";
 
     @PostMapping("/run")
-    public String runCommand(@RequestBody String command) {
+    public Map<String, Object> runCommand(@RequestBody PowerShellCommandDTO dto) {
+        Map<String, Object> response = new HashMap<>();
+
         try {
-            powerShellService.sendCommand(command);
-            return "Commande envoyée avec succès : " + command;
+            // Exécuter la commande PowerShell
+            powerShellService.sendCommand(dto.getCommand());
+
+            // Lire le contenu du fichier JSON
+            File file = new File(POWERSHELL_SCRIPT_PATH);
+            if (!file.exists() || file.length() == 0) {
+                response.put("data", null);
+            } else {
+                String json = Files.readString(Paths.get(POWERSHELL_SCRIPT_PATH));
+                response.put("data", json.isBlank() ? null : json);
+            }
+
         } catch (Exception e) {
-            return "Erreur : " + e.getMessage();
+            response.put("error", "Erreur : " + e.getMessage());
         }
+
+        return response;
     }
 
     @PostMapping("/stop")
@@ -30,8 +55,8 @@ public class PowerShellController {
     @PostMapping("/run-script")
     public String runScript(@RequestBody String scriptPath) {
         try {
-            powerShellService.sendScriptFile(scriptPath);
-            return "Script exécuté avec succès : " + scriptPath;
+            String jsonResult = powerShellService.runScript(scriptPath);
+            return "Script exécuté avec succès : " + jsonResult;
         } catch (Exception e) {
             return "Erreur : " + e.getMessage();
         }

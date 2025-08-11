@@ -1,11 +1,36 @@
-# test-get-user.ps1
+$users = Get-AzureADUser -All $true
 
-# Import du module AzureAD (si pas auto-importé)
-Import-Module AzureAD
+$result = @()
 
-# Connexion automatique si possible (ou token pré-enregistré)
-# Attention : cette commande nécessite une session interactive, donc pour test local uniquement
-# Connect-AzureAD
+foreach ($user in $users) {
+    $licenses = Get-AzureADUserLicenseDetail -ObjectId $user.ObjectId
 
-# Récupération d'un utilisateur (remplacer par un user réel ou utiliser un filtre)
-Get-AzureADUser -Top 1 | ConvertTo-Json -Depth 3
+    $licenseDetails = @()
+    foreach ($license in $licenses) {
+        $serviceStatuses = @()
+
+        foreach ($service in $license.ServicePlans) {
+            $serviceStatuses += @{
+                ServicePlan = @{
+                    ServiceName = $service.ServicePlanName
+                    ProvisioningStatus = $service.ProvisioningStatus
+                }
+            }
+        }
+
+        $licenseDetails += @{
+            AccountSkuId = $license.AccountSkuId
+            ServiceStatus = $serviceStatuses
+        }
+    }
+
+    $result += @{
+        DisplayName = $user.DisplayName
+        UserPrincipalName = $user.UserPrincipalName
+        isLicensed = $licenses.Count -gt 0
+        Licenses = $licenseDetails
+    }
+}
+
+# Convertit en JSON formaté
+$result | ConvertTo-Json -Depth 5

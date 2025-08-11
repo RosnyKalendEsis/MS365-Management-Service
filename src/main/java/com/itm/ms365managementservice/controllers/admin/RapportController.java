@@ -83,7 +83,7 @@ public class RapportController {
             rapport.setType("rapport");
             rapport.setDate(LocalDate.now().toString());
             rapport.setStatus("valide");
-            rapport.setAuthor("Assemblée Nationale");
+            rapport.setAuthor("Admin IT");
             rapport.setSize(String.format("%.1f Mo", pdfBytes.length / 1024f / 1024f));
             rapport.setFormat("pdf");
             rapport.setDescription("Rapport annuel des activités parlementaires");
