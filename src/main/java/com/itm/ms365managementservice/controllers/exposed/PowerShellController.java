@@ -54,7 +54,7 @@ PowerShellController {
             powerShellService.sendCommand(dto.getCommand());
 
             // Attendre 5 secondes (5000 ms)
-            Thread.sleep(5000);
+            Thread.sleep(2000);
 
             // Lire le contenu du fichier JSON
             String json = Files.readString(Paths.get(POWERSHELL_SCRIPT_PATH+"ExistUser.json"));
@@ -75,7 +75,7 @@ PowerShellController {
             powerShellService.sendCommand(dto.getCommand());
 
             // Attendre 5 secondes (5000 ms)
-            Thread.sleep(5000);
+            Thread.sleep(2000);
 
             // Lire le contenu du fichier JSON
             String json = Files.readString(Paths.get(POWERSHELL_SCRIPT_PATH+"azure_users.json"));
@@ -96,10 +96,32 @@ PowerShellController {
             powerShellService.sendCommand(dto.getCommand());
 
             // Attendre 5 secondes (5000 ms)
-            Thread.sleep(5000);
+            Thread.sleep(2000);
 
             // Lire le contenu du fichier JSON
             String json = Files.readString(Paths.get(POWERSHELL_SCRIPT_PATH+"azure_licences.json"));
+            response.put("data", json.isBlank() ? null : json);
+
+        } catch (Exception e) {
+            response.put("error", "Erreur : " + e.getMessage());
+        }
+
+        return response;
+    }
+
+
+    @PostMapping("create-users")
+    public Map<String, Object> runCommandCreateUser(@RequestBody PowerShellCommandDTO dto) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            // Exécuter la commande PowerShell
+            powerShellService.sendCommand(dto.getCommand());
+
+            // Attendre 5 secondes (5000 ms)
+            Thread.sleep(2000);
+
+            // Lire le contenu du fichier JSON
+            String json = Files.readString(Paths.get(POWERSHELL_SCRIPT_PATH+"azure_created_user.json"));
             response.put("data", json.isBlank() ? null : json);
 
         } catch (Exception e) {

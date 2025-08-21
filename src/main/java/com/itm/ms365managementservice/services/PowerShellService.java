@@ -75,7 +75,7 @@ public class PowerShellService {
                         }
 
                         // ✅ Détection de la connexion réussie à AzureAD
-                        if (line.matches(".*@.*\\s+AzureCloud\\s+[a-f0-9\\-]{36}.*")) {
+                        if (line.contains("AzureCloud")) {
                             System.out.println("✅ Connexion à AzureAD détectée.");
                             AzureState azureState = new AzureState();
                             if(!dbAzureStates.isEmpty()){
