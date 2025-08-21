@@ -20,7 +20,7 @@ import java.util.Map;
 public class
 PowerShellController {
     private final PowerShellService powerShellService;
-    private final static String POWERSHELL_SCRIPT_PATH = "src/main/resources/scripts/powershell/response.json";
+    private final static String POWERSHELL_SCRIPT_PATH = "src/main/resources/scripts/powershell/";
 
     @PostMapping("/run")
     public Map<String, Object> runCommand(@RequestBody PowerShellCommandDTO dto) {
@@ -31,11 +31,11 @@ PowerShellController {
             powerShellService.sendCommand(dto.getCommand());
 
             // Lire le contenu du fichier JSON
-            File file = new File(POWERSHELL_SCRIPT_PATH);
+            File file = new File(POWERSHELL_SCRIPT_PATH+"response.json");
             if (!file.exists() || file.length() == 0) {
                 response.put("data", null);
             } else {
-                String json = Files.readString(Paths.get(POWERSHELL_SCRIPT_PATH));
+                String json = Files.readString(Paths.get(POWERSHELL_SCRIPT_PATH+"response.json"));
                 response.put("data", json.isBlank() ? null : json);
             }
 
@@ -45,6 +45,71 @@ PowerShellController {
 
         return response;
     }
+
+    @PostMapping("check-user")
+    public Map<String, Object> runCommandCheckUser(@RequestBody PowerShellCommandDTO dto) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            // Exécuter la commande PowerShell
+            powerShellService.sendCommand(dto.getCommand());
+
+            // Attendre 5 secondes (5000 ms)
+            Thread.sleep(5000);
+
+            // Lire le contenu du fichier JSON
+            String json = Files.readString(Paths.get(POWERSHELL_SCRIPT_PATH+"ExistUser.json"));
+            response.put("data", json.isBlank() ? null : json);
+
+        } catch (Exception e) {
+            response.put("error", "Erreur : " + e.getMessage());
+        }
+
+        return response;
+    }
+
+    @PostMapping("get-users")
+    public Map<String, Object> runCommandGetUsers(@RequestBody PowerShellCommandDTO dto) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            // Exécuter la commande PowerShell
+            powerShellService.sendCommand(dto.getCommand());
+
+            // Attendre 5 secondes (5000 ms)
+            Thread.sleep(5000);
+
+            // Lire le contenu du fichier JSON
+            String json = Files.readString(Paths.get(POWERSHELL_SCRIPT_PATH+"azure_users.json"));
+            response.put("data", json.isBlank() ? null : json);
+
+        } catch (Exception e) {
+            response.put("error", "Erreur : " + e.getMessage());
+        }
+
+        return response;
+    }
+
+    @PostMapping("get-licences")
+    public Map<String, Object> runCommandGetSkUI(@RequestBody PowerShellCommandDTO dto) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            // Exécuter la commande PowerShell
+            powerShellService.sendCommand(dto.getCommand());
+
+            // Attendre 5 secondes (5000 ms)
+            Thread.sleep(5000);
+
+            // Lire le contenu du fichier JSON
+            String json = Files.readString(Paths.get(POWERSHELL_SCRIPT_PATH+"azure_licences.json"));
+            response.put("data", json.isBlank() ? null : json);
+
+        } catch (Exception e) {
+            response.put("error", "Erreur : " + e.getMessage());
+        }
+
+        return response;
+    }
+
+
 
     @PostMapping("/stop")
     public String stop() {
