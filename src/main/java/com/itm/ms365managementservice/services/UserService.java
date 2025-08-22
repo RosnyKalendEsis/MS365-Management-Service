@@ -46,4 +46,9 @@ public class UserService {
                 .map(User::getLicenses)
                 .orElse(Collections.emptyList());
     }
+
+    public User getUserByUserPrincipalName(String username) {
+        return userRepository.findByUserPrincipalName(username)
+                .orElse(null);
+    }
 }

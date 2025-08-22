@@ -54,7 +54,7 @@ PowerShellController {
             powerShellService.sendCommand(dto.getCommand());
 
             // Attendre 5 secondes (5000 ms)
-            Thread.sleep(2000);
+            Thread.sleep(5000);
 
             // Lire le contenu du fichier JSON
             String json = Files.readString(Paths.get(POWERSHELL_SCRIPT_PATH+"ExistUser.json"));
@@ -75,7 +75,7 @@ PowerShellController {
             powerShellService.sendCommand(dto.getCommand());
 
             // Attendre 5 secondes (5000 ms)
-            Thread.sleep(2000);
+            Thread.sleep(5000);
 
             // Lire le contenu du fichier JSON
             String json = Files.readString(Paths.get(POWERSHELL_SCRIPT_PATH+"azure_users.json"));
@@ -96,7 +96,7 @@ PowerShellController {
             powerShellService.sendCommand(dto.getCommand());
 
             // Attendre 5 secondes (5000 ms)
-            Thread.sleep(2000);
+            Thread.sleep(5000);
 
             // Lire le contenu du fichier JSON
             String json = Files.readString(Paths.get(POWERSHELL_SCRIPT_PATH+"azure_licences.json"));
@@ -118,7 +118,7 @@ PowerShellController {
             powerShellService.sendCommand(dto.getCommand());
 
             // Attendre 5 secondes (5000 ms)
-            Thread.sleep(2000);
+            Thread.sleep(5000);
 
             // Lire le contenu du fichier JSON
             String json = Files.readString(Paths.get(POWERSHELL_SCRIPT_PATH+"azure_created_user.json"));
